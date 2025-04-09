@@ -29,6 +29,9 @@ class GameRoom:
             return True
         return False
 
+    def get_messages(self):
+        return self.messages
+
     def publish_message(self, user_id: str, message: str) -> bool:
         if user_id in [self.host_user_id, self.guest_user_id]:
             self.messages.append((user_id, message))
