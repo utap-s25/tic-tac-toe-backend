@@ -8,7 +8,7 @@ class GameRoom:
         self.room_id = uuid4()
         self.host_player_id = host_player_id
         self.guest_player_id = ""
-        self.board_state = BoardState(host_player_id, "")
+        self.board_state: BoardState | None = None
         self.messages: list[tuple[str, str]] = []  # (userid, message)
 
     def get_room_id(self) -> UUID:
@@ -26,6 +26,7 @@ class GameRoom:
     def set_guest_player_id(self, guest_player_id: str) -> bool:
         if len(self.guest_player_id) == 0:
             self.guest_player_id = guest_player_id
+            self.board_state = BoardState(self.host_player_id, guest_player_id)
             return True
         return False
 
