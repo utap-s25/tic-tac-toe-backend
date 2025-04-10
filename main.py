@@ -115,6 +115,7 @@ def send_message(req: MessageRequest):
     room_id = req.room_id
     room = get_room(room_id)
     player_id = req.player_id
+    get_player(player_id)
     message = req.message
     if room.publish_message(player_id=player_id, message=message):
         return {"response": "Message sent."}
