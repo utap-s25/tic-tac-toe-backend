@@ -3,13 +3,13 @@ import json
 
 class BoardState:
 
-    def __init__(self, host_user_id: str, guest_user_id: str):
+    def __init__(self, host_player_id: str, guest_player_id: str):
         self.board = [["", "", ""], ["", "", ""], ["", "", ""]]
         self.pucks_remaining = {
-            str(host_user_id): [1, 2, 3, 4, 5, 6],
-            str(guest_user_id): [1, 2, 3, 4, 5, 6]
+            str(host_player_id): [1, 2, 3, 4, 5, 6],
+            str(guest_player_id): [1, 2, 3, 4, 5, 6]
         }
-        self.turn = host_user_id
+        self.turn = host_player_id
         """
         Empty string means game is ongoing
         Tie means game is over and tied

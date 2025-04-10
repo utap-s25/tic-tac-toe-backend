@@ -4,37 +4,37 @@ from BoardState import BoardState
 
 class GameRoom:
 
-    def __init__(self, host_user_id: str):
+    def __init__(self, host_player_id: str):
         self.room_id = uuid4()
-        self.host_user_id = host_user_id
-        self.guest_user_id = ""
-        self.board_state = BoardState(host_user_id, "")
+        self.host_player_id = host_player_id
+        self.guest_player_id = ""
+        self.board_state = BoardState(host_player_id, "")
         self.messages: list[tuple[str, str]] = []  # (userid, message)
 
     def get_room_id(self) -> UUID:
         return self.room_id
 
     def is_open(self) -> bool:
-        return len(self.guest_user_id) == 0
+        return len(self.guest_player_id) == 0
 
-    def get_host_user_id(self):
-        return self.host_user_id
+    def get_host_player_id(self):
+        return self.host_player_id
 
-    def get_guest_user_id(self):
-        return self.guest_user_id
+    def get_guest_player_id(self):
+        return self.guest_player_id
 
-    def set_guest_user_id(self, guest_user_id: str) -> bool:
-        if len(self.guest_user_id) == 0:
-            self.guest_user_id = guest_user_id
+    def set_guest_player_id(self, guest_player_id: str) -> bool:
+        if len(self.guest_player_id) == 0:
+            self.guest_player_id = guest_player_id
             return True
         return False
 
     def get_messages(self):
         return self.messages
 
-    def publish_message(self, user_id: str, message: str) -> bool:
-        if user_id in [self.host_user_id, self.guest_user_id]:
-            self.messages.append((user_id, message))
+    def publish_message(self, player_id: str, message: str) -> bool:
+        if player_id in [self.host_player_id, self.guest_player_id]:
+            self.messages.append((player_id, message))
             return True
         return False
 
