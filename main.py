@@ -1,3 +1,5 @@
+import json
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from uuid import uuid4, UUID
@@ -68,6 +70,18 @@ def create_player(req: CreatePlayerRequest):
     return {
         "response": {
             "player_id": random_id
+        }
+    }
+
+
+@app.get("/listPlayers")
+def list_players():
+    player_json = []
+    for player in players:
+        player_json.append(str(player))
+    return {
+        "response": {
+            "players": json.loads(str(player_json))
         }
     }
 
