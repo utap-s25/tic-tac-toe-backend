@@ -76,12 +76,11 @@ def create_player(req: CreatePlayerRequest):
 
 @app.get("/listPlayers")
 def list_players():
-    player_json = []
-    for player in players:
-        player_json.append(str(player))
+    player_json = [json.loads(str(player)) for player in players]
+    print(f"Players: {player_json}")
     return {
         "response": {
-            "players": json.loads(str(player_json))
+            "players": player_json
         }
     }
 
