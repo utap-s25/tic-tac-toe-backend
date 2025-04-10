@@ -99,6 +99,7 @@ def join_room(req: JoinRoomRequest):
     if not room.is_open():
         raise HTTPException(status_code=403, detail="Room already full.")
     guest_player_id = req.player_id
+    get_player(guest_player_id)
     if room.set_guest_player_id(guest_player_id):
         return {"response": f"Player id {guest_player_id} joined room {room_id} successfully."}
     raise HTTPException(status_code=403, detail=f"Player id {guest_player_id} cannot join room {room_id}")
