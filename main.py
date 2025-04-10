@@ -28,8 +28,6 @@ class MessageRequest(BaseModel):
     message: str
 
 
-
-
 # --- Game State ---
 
 
@@ -61,7 +59,8 @@ def create_player(req: CreatePlayerRequest):
     for existing_player in players:
         if existing_player.player_name == player_name:
             raise HTTPException(status_code=400,
-                                detail=f'A player with the given name "{player_name}" already exists!')
+                                detail=f'A player {existing_player.player_id} with the given name "{player_name}" '
+                                       f'already exists!')
     random_id = str(uuid4())
     new_player = Player(player_id=random_id, player_name=player_name)
     players.append(new_player)
@@ -130,5 +129,3 @@ def fetch_messages(room_id: str):
         player = get_player(player_id)
         friendly_messages.append([player.player_name, message])
     return {"response": {"messages": friendly_messages}}
-
-
