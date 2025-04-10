@@ -24,7 +24,7 @@ class GameRoom:
         return self.guest_player_id
 
     def set_guest_player_id(self, guest_player_id: str) -> bool:
-        if len(self.guest_player_id) == 0:
+        if len(self.guest_player_id) == 0 and self.host_player_id != guest_player_id:
             self.guest_player_id = guest_player_id
             self.board_state = BoardState(self.host_player_id, guest_player_id)
             return True
