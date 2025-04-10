@@ -9,7 +9,7 @@ from Player import Player
 app = FastAPI()
 
 
-class CreateUserRequest(BaseModel):
+class CreatePlayerRequest(BaseModel):
     player_name: str
 
 
@@ -28,10 +28,6 @@ class MessageRequest(BaseModel):
     message: str
 
 
-class MoveRequest(BaseModel):
-    roomId: UUID
-    userId: UUID
-    updatedBoardState: dict  # You can define a better schema here if needed
 
 
 # --- Game State ---
@@ -59,13 +55,13 @@ def get_player(player_id: str) -> Player:
 
 # --- API Endpoints ---
 
-@app.put("/createUser")
-def create_user(req: CreateUserRequest):
+@app.put("/createPlayer")
+def create_player(req: CreatePlayerRequest):
     player_name = req.player_name
     for existing_player in players:
         if existing_player.player_name == player_name:
             raise HTTPException(status_code=400,
-                                detail=f"A player with the given user name {player_name} already exists!")
+                                detail=f'A player with the given name "{player_name}" already exists!')
     random_id = str(uuid4())
     new_player = Player(player_id=random_id, player_name=player_name)
     players.append(new_player)
