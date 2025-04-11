@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from uuid import uuid4, UUID
 from typing import Dict, List, Optional, Tuple
 
+import BoardState
 from GameRoom import GameRoom
 from Player import Player
 
@@ -144,3 +145,12 @@ def fetch_messages(room_id: str):
         player = get_player(player_id)
         friendly_messages.append([player.player_name, message])
     return {"response": {"messages": friendly_messages}}
+
+
+@app.get("/boardState")
+def get_board_state(room_id: str):
+    room = get_room(room_id)
+    board_state: BoardState = room.get_board()
+    print(str(board_state))
+    board_state_json = json.loads(str(board_state))
+    return {"response": {"boardState": board_state_json}}
