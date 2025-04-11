@@ -43,3 +43,9 @@ class BoardState:
             "turn": self.turn,
             "game_over": self.game_over
         })
+
+
+board_state = BoardState("a", "b")
+board_state_string = str(board_state)
+board_state_json = json.loads(board_state_string)
+print(json.dumps(board_state_json, indent=2))
