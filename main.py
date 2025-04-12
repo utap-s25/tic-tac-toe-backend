@@ -31,6 +31,14 @@ class MessageRequest(BaseModel):
     message: str
 
 
+class MakeMoveRequest(BaseModel):
+    room_id: str
+    player_id: str
+    row: int
+    column: int
+    puck: int
+
+
 # --- Game State ---
 
 
@@ -151,6 +159,26 @@ def fetch_messages(room_id: str):
 def get_board_state(room_id: str):
     room = get_room(room_id)
     board_state: BoardState = room.get_board()
+    board_state_string = str(board_state)
+    board_state_json = json.loads(board_state_string)
+    print(json.dumps(board_state_json, indent=2))
+    return {"response": {"boardState": board_state_json}}
+
+
+@app.post("/makeMove")
+def make_move(req: MakeMoveRequest):
+    room_id = req.room_id
+    room = get_room(room_id)
+
+    player_id = req.player_id
+    get_player(player_id)
+
+    row = req.row
+    column = req.column
+    puck = req.puck
+
+    board_state: BoardState = room.get_board()
+    board_state.make_move(player_id=player_id, row=row, column=column, puck=puck)
     board_state_string = str(board_state)
     board_state_json = json.loads(board_state_string)
     print(json.dumps(board_state_json, indent=2))
