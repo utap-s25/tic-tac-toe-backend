@@ -2,15 +2,21 @@ from uuid import uuid4, UUID
 from BoardState import BoardState
 from pydantic import BaseModel
 
+from UniqueWordGenerator import UniqueWordGenerator
+
+
 class Message(BaseModel):
     id_or_name: str
     message: str
 
 
+word_generator = UniqueWordGenerator()
+
+
 class GameRoom:
 
     def __init__(self, host_player_id: str):
-        self.room_id = uuid4()
+        self.room_id = word_generator.generate(8)
         self.host_player_id = host_player_id
         self.guest_player_id = ""
         self.board_state = BoardState(self.host_player_id, self.guest_player_id)
