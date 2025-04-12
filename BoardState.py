@@ -84,11 +84,13 @@ class BoardState:
         updated_game_status = self.check_game_over()
         self.game_over = updated_game_status
 
-
     def __str__(self):
         return json.dumps({
             "board": self.board,
-            "pucks_remaining": self.pucks_remaining,
+            "pucks_remaining": {
+                str(self.host_player_id): self.pucks_remaining.get(self.host_player_id, []),
+                str(self.guest_player_id): self.pucks_remaining.get(self.guest_player_id, [])
+            },
             "turn": self.turn,
             "game_over": self.game_over
         })
