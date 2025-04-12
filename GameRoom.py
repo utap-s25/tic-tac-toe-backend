@@ -41,6 +41,9 @@ class GameRoom:
             return True
         return False
 
+    def is_room_full(self):
+        return len(self.host_player_id) > 0 and len(self.guest_player_id) > 0
+
     def get_messages(self):
         return self.messages
 
