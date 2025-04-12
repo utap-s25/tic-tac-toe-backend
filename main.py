@@ -149,6 +149,7 @@ def get_board_state(room_id: str):
     room = get_room(room_id)
     board_state: BoardState = room.get_board()
     board_state_string = str(board_state)
+    print(board_state_string)
     board_state_json = json.loads(board_state_string)
     print(json.dumps(board_state_json, indent=2))
     return {"response": {"boardState": board_state_json}}
