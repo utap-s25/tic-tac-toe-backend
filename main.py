@@ -121,6 +121,16 @@ def list_open_rooms():
     return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if room.is_open()]}}
 
 
+@app.get("/listActiveRooms")
+def list_active_rooms():
+    active_rooms = []
+    for rid, room in rooms.items():
+        board = room.get_board()
+        if room.is_room_full() and board.check_game_over() == BoardState.STILL_PLAYING:
+            active_rooms.append(rid)
+    return {"response": {"activeRooms": active_rooms}}
+
+
 @app.put("/sendMessage")
 def send_message(req: MessageRequest):
     room_id = req.room_id
