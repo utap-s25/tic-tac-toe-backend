@@ -41,14 +41,14 @@ class BoardState:
     def make_move(self, player_id: str, row: int, column: int, puck: int):
         game_status = self.check_game_over()
         if game_status != STILL_PLAYING:
-            raise HTTPException(status_code=400, detail=f"The game is already over, result: ${game_status}")
+            raise HTTPException(status_code=400, detail=f"The game is already over, result: {game_status}")
 
         # Only the host and guest player's may make a move here
         if player_id not in [self.host_player_id, self.guest_player_id]:
             raise HTTPException(status_code=400, detail=f"Player id {player_id} does not belong in this board!")
         # Only the current player can make a move
         if player_id != self.turn:
-            raise HTTPException(status_code=400, detail=f"Player id {player_id} cannot move, it is ${self.turn} turn!")
+            raise HTTPException(status_code=400, detail=f"Player id {player_id} cannot move, it is {self.turn} turn!")
 
         # current player has no pucks left!
         player_pucks = self.pucks_remaining.get(player_id, [])
@@ -57,7 +57,7 @@ class BoardState:
         # current player using a puck that does not exist
         if puck not in player_pucks:
             raise HTTPException(status_code=400,
-                                detail=f"Player id {player_id} puck ${puck} not found in ${player_pucks}!")
+                                detail=f"Player id {player_id} puck {puck} not found in {player_pucks}!")
 
         tile = self.board[row][column]
         tile_owner = tile[0]
@@ -71,7 +71,7 @@ class BoardState:
             player_pucks.remove(puck)
         else:
             raise HTTPException(status_code=400,
-                                detail=f"Player id {player_id} cannot place puck ${puck} at (${row},${column})!")
+                                detail=f"Player id {player_id} cannot place puck {puck} at ({row},{column})!")
 
         # The move was valid and successful
         # Alternate the turns
