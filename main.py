@@ -6,7 +6,7 @@ from uuid import uuid4, UUID
 from typing import Dict, List, Optional, Tuple
 
 import BoardState
-from GameRoom import GameRoom
+from GameRoom import GameRoom, Message
 from Player import Player
 
 app = FastAPI()
@@ -136,11 +136,11 @@ def send_message(req: MessageRequest):
 @app.get("/fetchMessages")
 def fetch_messages(room_id: str):
     room = get_room(room_id)
-    messages: list[tuple[str, str]] = room.get_messages()
+    messages: list[Message] = room.get_messages()
     friendly_messages = []
     for player_id, message in messages:
         player = get_player(player_id)
-        friendly_messages.append([player.player_name, message])
+        friendly_messages.append(Message(player.player_name, message))
     return {"response": {"messages": friendly_messages}}
 
 
