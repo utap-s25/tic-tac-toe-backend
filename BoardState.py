@@ -6,14 +6,27 @@ STILL_PLAYING = ""
 TIE = "TIE"
 
 
+class Tile:
+
+    def __init__(self, owner: str, puck_size: int):
+        self.owner = owner
+        self.puck_size = puck_size
+
+    def __str__(self):
+        return json.dumps({
+            "owner": self.owner,
+            "puckSize": self.puck_size
+        })
+
+
 class BoardState:
 
     def __init__(self, host_player_id: str, guest_player_id: str):
         # [player_id or empty_string, puck_size]
         self.board = [
-            [["", "0"], ["", "0"], ["", "0"]],
-            [["", "0"], ["", "0"], ["", "0"]],
-            [["", "0"], ["", "0"], ["", "0"]]
+            [Tile("", 0), Tile("", 0), Tile("", 0)],
+            [Tile("", 0), Tile("", 0), Tile("", 0)],
+            [Tile("", 0), Tile("", 0), Tile("", 0)]
         ]
         self.host_player_id = host_player_id
         self.guest_player_id = guest_player_id
@@ -60,13 +73,11 @@ class BoardState:
                                 detail=f"Player id {player_id} puck {puck} not found in {player_pucks}!")
 
         tile = self.board[row][column]
-        tile_owner = tile[0]
-        tile_puck_size = int(tile[1])
 
-        if tile_owner == "" or tile_puck_size < puck:
+        if tile.owner == "" or tile.puck_size < puck:
             # Place the player puck
-            tile[0] = player_id
-            tile[1] = str(puck)
+            tile.owner = player_id
+            tile.puck_size = puck
             # Remove the puck from the list of player's pucks
             player_pucks.remove(puck)
         else:
@@ -85,8 +96,15 @@ class BoardState:
         self.game_over = updated_game_status
 
     def __str__(self):
+
+        flattened_board = []
+        for row in range(3):
+            for column in range(3):
+                tile = self.board[row][column]
+                flattened_board.append(json.loads(str(tile)))
+
         return json.dumps({
-            "board": self.board,
+            "board": flattened_board,
             "pucks_remaining": {
                 str(self.host_player_id): self.pucks_remaining.get(self.host_player_id, []),
                 str(self.guest_player_id): self.pucks_remaining.get(self.guest_player_id, [])
@@ -104,7 +122,7 @@ class BoardState:
 
     def check_game_over(self):
         def get_owner(row: int, column: int):
-            return self.board[row][column][0]
+            return self.board[row][column].owner
 
         # 8 possible win lines (3 rows, 3 cols, 2 diagonals)
         lines = [
@@ -139,9 +157,7 @@ class BoardState:
             for r in range(3):
                 for c in range(3):
                     tile = self.board[r][c]
-                    tile_owner = tile[0]
-                    tile_puck_size = int(tile[1])
-                    if tile_owner == "" or tile_puck_size < size:
+                    if tile.owner == "" or tile.puck_size < size:
                         can_move = True
                         break
                 if can_move:
@@ -171,9 +187,7 @@ def get_next_board_states(current: BoardState):
         for r in range(3):
             for c in range(3):
                 tile = current.board[r][c]
-                tile_owner = tile[0]
-                tile_puck_size = int(tile[1])
-                if tile_owner == "" or tile_puck_size < size:
+                if tile.owner == "" or tile.puck_size < size:
                     # Copy current state into new one
                     next_state = BoardState(current.host_player_id, current.guest_player_id)
                     next_state.board = [row.copy() for row in current.board]
@@ -183,7 +197,7 @@ def get_next_board_states(current: BoardState):
                     next_state.turn = current.get_waiting_player()
 
                     # Place puck
-                    next_state.board[r][c] = [current_player, str(size)]
+                    next_state.board[r][c] = Tile(current_player, size)
                     next_state.pucks_remaining[current_player].remove(size)
 
                     # Check if this move ends the game
