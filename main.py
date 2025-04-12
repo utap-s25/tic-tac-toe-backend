@@ -65,7 +65,7 @@ def get_player(player_id: str) -> Player:
 
 @app.put("/createPlayer")
 def create_player(req: CreatePlayerRequest):
-    player_name = req.player_named
+    player_name = req.player_name
     random_id = str(uuid4())
     new_player = Player(player_id=random_id, player_name=player_name)
     players[random_id] = new_player
