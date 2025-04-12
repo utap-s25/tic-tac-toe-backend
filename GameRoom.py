@@ -13,7 +13,7 @@ class GameRoom:
         self.room_id = uuid4()
         self.host_player_id = host_player_id
         self.guest_player_id = ""
-        self.board_state: BoardState | None = None
+        self.board_state = BoardState(self.host_player_id, self.guest_player_id)
         self.messages: list[Message] = []  # (userid, message)
 
     def get_room_id(self) -> UUID:
