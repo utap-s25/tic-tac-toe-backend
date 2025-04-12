@@ -6,7 +6,7 @@ from uuid import uuid4, UUID
 from typing import Dict, List, Optional, Tuple
 
 import BoardState
-from GameRoom import GameRoom
+from GameRoom import GameRoom, Message
 from Player import Player
 
 app = FastAPI()
@@ -44,7 +44,7 @@ class MakeMoveRequest(BaseModel):
 
 # --- In-Memory Data ---
 
-players: list[Player] = []
+players: Dict[str, Player] = {}
 rooms: Dict[str, GameRoom] = {}
 
 
@@ -56,9 +56,8 @@ def get_room(room_id: str) -> GameRoom:
 
 
 def get_player(player_id: str) -> Player:
-    for player in players:
-        if player.player_id == player_id:
-            return player
+    if player_id in players:
+        return players[player_id]
     raise HTTPException(status_code=404, detail=f"Player {player_id} not found!")
 
 
@@ -67,14 +66,9 @@ def get_player(player_id: str) -> Player:
 @app.put("/createPlayer")
 def create_player(req: CreatePlayerRequest):
     player_name = req.player_name
-    for existing_player in players:
-        if existing_player.player_name == player_name:
-            raise HTTPException(status_code=400,
-                                detail=f'A player {existing_player.player_id} with the given name "{player_name}" '
-                                       f'already exists!')
     random_id = str(uuid4())
     new_player = Player(player_id=random_id, player_name=player_name)
-    players.append(new_player)
+    players[random_id] = new_player
     print(f"Created new player: {new_player}")
     return {
         "response": {
@@ -85,7 +79,7 @@ def create_player(req: CreatePlayerRequest):
 
 @app.get("/listPlayers")
 def list_players():
-    player_json = [json.loads(str(player)) for player in players]
+    player_json = [json.loads(str(player)) for player in players.values()]
     print(f"Players: {player_json}")
     return {
         "response": {
@@ -97,12 +91,7 @@ def list_players():
 @app.put("/createRoom")
 def create_room(req: CreateRoomRequest):
     player_id = req.player_id
-    found = False
-    for existing_player in players:
-        if existing_player.player_id == player_id:
-            found = True
-            break
-    if not found:
+    if player_id not in players:
         raise HTTPException(status_code=404, detail=f"Cannot create room, player id: {player_id} not found.")
     room = GameRoom(player_id)
     room_id = str(room.room_id)
@@ -147,11 +136,11 @@ def send_message(req: MessageRequest):
 @app.get("/fetchMessages")
 def fetch_messages(room_id: str):
     room = get_room(room_id)
-    messages: list[tuple[str, str]] = room.get_messages()
+    messages: list[Message] = room.get_messages()
     friendly_messages = []
     for player_id, message in messages:
         player = get_player(player_id)
-        friendly_messages.append([player.player_name, message])
+        friendly_messages.append(Message(player.player_name, message))
     return {"response": {"messages": friendly_messages}}
 
 

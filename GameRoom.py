@@ -1,5 +1,10 @@
 from uuid import uuid4, UUID
 from BoardState import BoardState
+from pydantic import BaseModel
+
+class Message(BaseModel):
+    id_or_name: str
+    message: str
 
 
 class GameRoom:
@@ -9,7 +14,7 @@ class GameRoom:
         self.host_player_id = host_player_id
         self.guest_player_id = ""
         self.board_state: BoardState | None = None
-        self.messages: list[tuple[str, str]] = []  # (userid, message)
+        self.messages: list[Message] = []  # (userid, message)
 
     def get_room_id(self) -> UUID:
         return self.room_id
@@ -35,7 +40,7 @@ class GameRoom:
 
     def publish_message(self, player_id: str, message: str) -> bool:
         if player_id in [self.host_player_id, self.guest_player_id]:
-            self.messages.append((player_id, message))
+            self.messages.append(Message(player_id, message))
             return True
         return False
 
