@@ -148,7 +148,7 @@ def fetch_messages(room_id: str):
 def get_board_state(room_id: str):
     room = get_room(room_id)
     if room.is_open():
-        raise HTTPException(status_code=403, detail=f"Cannot fetch board state. Room ${room_id} is open.")
+        raise HTTPException(status_code=403, detail=f"Cannot fetch board state. Room {room_id} is open.")
     board_state: BoardState = room.get_board()
     board_state_string = str(board_state)
     print(board_state_string)
@@ -162,7 +162,7 @@ def make_move(req: MakeMoveRequest):
     room_id = req.room_id
     room = get_room(room_id)
     if room.is_open():
-        raise HTTPException(status_code=403, detail=f"Cannot fetch board state. Room ${room_id} is open.")
+        raise HTTPException(status_code=403, detail=f"Cannot fetch board state. Room {room_id} is open.")
 
     player_id = req.player_id
     get_player(player_id)
