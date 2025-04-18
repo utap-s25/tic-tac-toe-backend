@@ -44,8 +44,8 @@ class MakeMoveRequest(BaseModel):
 
 # --- In-Memory Data ---
 
-players: Dict[str, Player] = {}
-rooms: Dict[str, GameRoom] = {}
+players: Dict[str, Player] = {} # <id, player object>
+rooms: Dict[str, GameRoom] = {} # <id, room object>
 
 
 def get_room(room_id: str) -> GameRoom:
@@ -84,6 +84,14 @@ def list_players():
     return {
         "response": {
             "players": player_json
+        }
+    }
+
+@app.get("/playerName")
+def player_name(id: str):
+    return {
+        "response": {
+            "player_name": players[id].player_name if id in players else ""
         }
     }
 
@@ -162,7 +170,7 @@ def get_board_state(room_id: str):
     print(board_state_string)
     board_state_json = json.loads(board_state_string)
     print(json.dumps(board_state_json, indent=2))
-    return {"response": {"boardState": board_state_json}}
+    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
 
 
 @app.post("/makeMove")
@@ -184,4 +192,4 @@ def make_move(req: MakeMoveRequest):
     board_state_string = str(board_state)
     board_state_json = json.loads(board_state_string)
     print(json.dumps(board_state_json, indent=2))
-    return {"response": {"boardState": board_state_json}}
+    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
