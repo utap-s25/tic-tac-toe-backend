@@ -1,4 +1,5 @@
 import json
+from time import time
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -124,13 +125,32 @@ def join_room(req: JoinRoomRequest):
     raise HTTPException(status_code=403, detail=f"Player id {guest_player_id} cannot join room {room_id}")
 
 
+def kill_old_rooms():
+    old_rooms = []
+    for rid, room in rooms.items():
+        if room.last_ping + 15 > time():
+            old_rooms.append(rid)
+    for rid in old_rooms:
+        del rooms[rid]
+
+
 @app.get("/listOpenRooms")
 def list_open_rooms():
+    kill_old_rooms()
+
     return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if room.is_open()]}}
+
+
+@app.get("/listFullRooms")
+def list_full_rooms():
+    kill_old_rooms()
+
+    return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if len(room.get_guest_player_id()) > 0]}}    # Return if guest is set
 
 
 @app.get("/listActiveRooms")
 def list_active_rooms():
+    # Sorry I realised this existed too late. Delete?
     active_rooms = []
     for rid, room in rooms.items():
         board = room.get_board()
@@ -141,6 +161,7 @@ def list_active_rooms():
 
 @app.put("/sendMessage")
 def send_message(req: MessageRequest):
+
     room_id = req.room_id
     room = get_room(room_id)
     player_id = req.player_id
@@ -158,18 +179,17 @@ def fetch_messages(room_id: str):
     friendly_messages = []
     for player_id, message in messages:
         player = get_player(player_id[1])
-        friendly_messages.append(Message(player.player_name, message[1]))
+        friendly_messages.append(Message(id_or_name=player.player_name, message=message[1]))
     return {"response": {"messages": friendly_messages}}
 
 
 @app.get("/boardState")
 def get_board_state(room_id: str):
     room = get_room(room_id)
+    room.ping_room()
     board_state: BoardState = room.get_board()
     board_state_string = str(board_state)
-    print(board_state_string)
     board_state_json = json.loads(board_state_string)
-    print(json.dumps(board_state_json, indent=2))
     return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
 
 

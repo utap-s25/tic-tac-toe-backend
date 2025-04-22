@@ -1,6 +1,7 @@
 from uuid import uuid4, UUID
 from BoardState import BoardState
 from pydantic import BaseModel
+from time import time
 
 from UniqueWordGenerator import UniqueWordGenerator
 
@@ -21,6 +22,7 @@ class GameRoom:
         self.guest_player_id = ""
         self.board_state = BoardState(self.host_player_id, self.guest_player_id)
         self.messages: list[Message] = []  # (userid, message)
+        self.last_ping = time()
 
     def get_room_id(self) -> UUID:
         return self.room_id
@@ -58,6 +60,9 @@ class GameRoom:
         # can be reached by making a move from the current state
         self.board_state = proposed_board_state
         return True
+
+    def ping_room(self):
+        self.last_ping = time()
 
     def get_board(self) -> BoardState:
         return self.board_state
