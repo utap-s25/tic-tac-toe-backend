@@ -49,7 +49,7 @@ class GameRoom:
 
     def publish_message(self, player_id: str, message: str) -> bool:
         if player_id in [self.host_player_id, self.guest_player_id]:
-            self.messages.append(Message(player_id, message))
+            self.messages.append(Message(id_or_name=player_id, message=message))
             return True
         return False
 
