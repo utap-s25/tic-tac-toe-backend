@@ -157,8 +157,8 @@ def fetch_messages(room_id: str):
     messages: list[Message] = room.get_messages()
     friendly_messages = []
     for player_id, message in messages:
-        player = get_player(player_id)
-        friendly_messages.append(Message(player.player_name, message))
+        player = get_player(player_id[1])
+        friendly_messages.append(Message(player.player_name, message[1]))
     return {"response": {"messages": friendly_messages}}
 
 
