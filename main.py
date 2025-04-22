@@ -1,4 +1,5 @@
 import json
+from time import time
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -124,23 +125,32 @@ def join_room(req: JoinRoomRequest):
     raise HTTPException(status_code=403, detail=f"Player id {guest_player_id} cannot join room {room_id}")
 
 
+def kill_old_rooms():
+    old_rooms = []
+    for rid, room in rooms.items():
+        if room.last_ping + 15 < time():
+            old_rooms.append(rid)
+    for rid in old_rooms:
+        del rooms[rid]
+
+
 @app.get("/listOpenRooms")
 def list_open_rooms():
-    return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if room.is_open()]}}
+    kill_old_rooms()
+
+    return {"response": {"openRooms": [room.serialize() for room in rooms.values() if room.is_open()]}}
 
 
-@app.get("/listActiveRooms")
-def list_active_rooms():
-    active_rooms = []
-    for rid, room in rooms.items():
-        board = room.get_board()
-        if room.is_room_full() and board.check_game_over() == BoardState.STILL_PLAYING:
-            active_rooms.append(rid)
-    return {"response": {"activeRooms": active_rooms}}
+@app.get("/listFullRooms")
+def list_full_rooms():
+    kill_old_rooms()
+
+    return {"response": {"openRooms": [room.serialize() for room in rooms.values() if len(room.get_guest_player_id()) > 0]}}    # Return if guest is set
 
 
 @app.put("/sendMessage")
 def send_message(req: MessageRequest):
+
     room_id = req.room_id
     room = get_room(room_id)
     player_id = req.player_id
@@ -151,26 +161,11 @@ def send_message(req: MessageRequest):
     raise HTTPException(status_code=403, detail=f"Player id {player_id} does not belong in room {room_id}!")
 
 
-@app.get("/fetchMessages")
-def fetch_messages(room_id: str):
+@app.get("/roomState")
+def get_room_state(room_id: str):
     room = get_room(room_id)
-    messages: list[Message] = room.get_messages()
-    friendly_messages = []
-    for player_id, message in messages:
-        player = get_player(player_id)
-        friendly_messages.append(Message(player.player_name, message))
-    return {"response": {"messages": friendly_messages}}
-
-
-@app.get("/boardState")
-def get_board_state(room_id: str):
-    room = get_room(room_id)
-    board_state: BoardState = room.get_board()
-    board_state_string = str(board_state)
-    print(board_state_string)
-    board_state_json = json.loads(board_state_string)
-    print(json.dumps(board_state_json, indent=2))
-    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
+    room.ping_room()
+    return {"response": room.serialize()}
 
 
 @app.post("/makeMove")
@@ -189,7 +184,4 @@ def make_move(req: MakeMoveRequest):
 
     board_state: BoardState = room.get_board()
     board_state.make_move(player_id=player_id, row=row, column=column, puck=puck)
-    board_state_string = str(board_state)
-    board_state_json = json.loads(board_state_string)
-    print(json.dumps(board_state_json, indent=2))
-    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
+    return {"response": room.serialize()}

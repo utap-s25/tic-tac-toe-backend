@@ -1,6 +1,8 @@
 from uuid import uuid4, UUID
 from BoardState import BoardState
 from pydantic import BaseModel
+from time import time
+from json import loads
 
 from UniqueWordGenerator import UniqueWordGenerator
 
@@ -21,6 +23,7 @@ class GameRoom:
         self.guest_player_id = ""
         self.board_state = BoardState(self.host_player_id, self.guest_player_id)
         self.messages: list[Message] = []  # (userid, message)
+        self.last_ping = time()
 
     def get_room_id(self) -> UUID:
         return self.room_id
@@ -49,7 +52,7 @@ class GameRoom:
 
     def publish_message(self, player_id: str, message: str) -> bool:
         if player_id in [self.host_player_id, self.guest_player_id]:
-            self.messages.append(Message(player_id, message))
+            self.messages.append(Message(id_or_name=player_id, message=message))
             return True
         return False
 
@@ -59,5 +62,11 @@ class GameRoom:
         self.board_state = proposed_board_state
         return True
 
+    def ping_room(self):
+        self.last_ping = time()
+
     def get_board(self) -> BoardState:
         return self.board_state
+    
+    def serialize(self):
+        return {"boardState": loads(str(self.board_state)), "host": self.host_player_id, "guest": self.guest_player_id, "roomId": self.room_id, "messages": self.messages}
