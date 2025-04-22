@@ -128,7 +128,7 @@ def join_room(req: JoinRoomRequest):
 def kill_old_rooms():
     old_rooms = []
     for rid, room in rooms.items():
-        if room.last_ping + 15 > time():
+        if room.last_ping + 15 < time():
             old_rooms.append(rid)
     for rid in old_rooms:
         del rooms[rid]
