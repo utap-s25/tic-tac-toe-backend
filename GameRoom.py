@@ -2,6 +2,7 @@ from uuid import uuid4, UUID
 from BoardState import BoardState
 from pydantic import BaseModel
 from time import time
+from json import loads
 
 from UniqueWordGenerator import UniqueWordGenerator
 
@@ -66,3 +67,6 @@ class GameRoom:
 
     def get_board(self) -> BoardState:
         return self.board_state
+    
+    def serialize(self):
+        return {"boardState": loads(str(self.board_state)), "host": self.host_player_id, "guest": self.guest_player_id, "roomId": self.room_id, "messages": self.messages}

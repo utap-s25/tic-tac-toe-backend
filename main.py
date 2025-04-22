@@ -138,14 +138,14 @@ def kill_old_rooms():
 def list_open_rooms():
     kill_old_rooms()
 
-    return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if room.is_open()]}}
+    return {"response": {"openRooms": [room.serialize() for room in rooms.values() if room.is_open()]}}
 
 
 @app.get("/listFullRooms")
 def list_full_rooms():
     kill_old_rooms()
 
-    return {"response": {"openRooms": [str(rid) for rid, room in rooms.items() if len(room.get_guest_player_id()) > 0]}}    # Return if guest is set
+    return {"response": {"openRooms": [room.serialize() for room in rooms.values() if len(room.get_guest_player_id()) > 0]}}    # Return if guest is set
 
 
 @app.get("/listActiveRooms")
@@ -187,10 +187,7 @@ def fetch_messages(room_id: str):
 def get_board_state(room_id: str):
     room = get_room(room_id)
     room.ping_room()
-    board_state: BoardState = room.get_board()
-    board_state_string = str(board_state)
-    board_state_json = json.loads(board_state_string)
-    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
+    return {"response": room.serialize()}
 
 
 @app.post("/makeMove")
@@ -209,7 +206,4 @@ def make_move(req: MakeMoveRequest):
 
     board_state: BoardState = room.get_board()
     board_state.make_move(player_id=player_id, row=row, column=column, puck=puck)
-    board_state_string = str(board_state)
-    board_state_json = json.loads(board_state_string)
-    print(json.dumps(board_state_json, indent=2))
-    return {"response": {"boardState": board_state_json, "host": room.get_host_player_id()}}
+    return {"response": room.serialize()}
