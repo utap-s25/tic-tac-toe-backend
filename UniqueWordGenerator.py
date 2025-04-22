@@ -25,7 +25,7 @@ class UniqueWordGenerator:
             else:
                 word += "."     # Concat via "." for ease of typing an readability
             temp_word = "x" * min_length
-            while len(temp_word) > min_length:  # Make sure the word is a reasonable length
+            while len(temp_word) >= min_length:  # Make sure the word is a reasonable length
                 temp_word = random.choice(word_list)
             word += temp_word
         if word in self.generated_words:
